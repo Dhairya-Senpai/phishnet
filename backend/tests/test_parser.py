@@ -61,7 +61,7 @@ def test_parse_raw_email_extracts_fields():
 
 
 def test_parse_auth_results_pass():
-    header = "mx.target.com; spf=pass smtp.mailfrom=example.com; dkim=pass header.i=@example.com; dmarc=pass"
+    header = "mx.target.com; spf=pass smtp.mailfrom=example.com; dkim=pass header.from=example.com; dmarc=pass"
     result = parse_auth_results(header)
     assert result["spf_result"] == "pass"
     assert result["dkim_result"] == "pass"
