@@ -63,6 +63,19 @@ services:
         condition: service_healthy
     command: celery -A app.worker worker --loglevel=info --concurrency=4
 
+  postfix:
+    build:
+      context: ./infrastructure/postfix
+      dockerfile: Dockerfile
+    environment:
+      PHISHNET_API_URL: http://backend:8000
+      PHISHNET_API_KEY: ${API_KEY:-change-me-in-production}
+    ports:
+      - "2525:2525"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
   frontend:
     build:
       context: ./frontend

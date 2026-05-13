@@ -1,0 +1,35 @@
+# Phishnet Postfix - local ingestion only
+myhostname = phishnet.local
+mydomain = phishnet.local
+myorigin = $mydomain
+
+# Listen on all interfaces, port 2525
+inet_interfaces = all
+inet_protocols = ipv4
+master_service_disable =
+
+# Accept mail for these domains
+mydestination = phishnet.local, localhost.localdomain, localhost
+relay_domains =
+
+# No TLS required for local testing
+smtpd_use_tls = no
+
+# Permissive for local testing - accept from any host
+smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+mynetworks = 0.0.0.0/0
+
+# Disable local delivery - pipe everything to our script
+local_transport = phishnet_pipe
+local_recipient_maps =
+
+# Mailbox size
+mailbox_size_limit = 51200000
+message_size_limit = 10240000
+
+# Queue settings
+maximal_queue_lifetime = 1h
+bounce_queue_lifetime = 1h
+
+# Logging
+maillog_file = /dev/stdout
