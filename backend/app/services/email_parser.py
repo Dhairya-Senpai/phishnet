@@ -83,10 +83,8 @@ def _extract_source_ip(relay_path: list) -> Optional[str]:
 
 # ── Auth result parsing ───────────────────────────────────────────────────────
 
-AUTH_PATTERN = re.compile(
-    r'(spf|dkim|dmarc)=(\w+)(?:.*?header\.(?:from|i)=([\w.\-@]+))?',
-    re.IGNORECASE,
-)
+# Simple pattern: just capture protocol=result
+AUTH_PATTERN = re.compile(r'(spf|dkim|dmarc)=(\w+)', re.IGNORECASE)
 
 
 def parse_auth_results(header_value: str) -> dict:
@@ -104,18 +102,21 @@ def parse_auth_results(header_value: str) -> dict:
     for match in AUTH_PATTERN.finditer(header_value):
         protocol = match.group(1).lower()
         outcome  = match.group(2).lower()
-        domain   = match.group(3)
 
         if protocol == "spf":
             result["spf_result"] = outcome
-            if domain:
-                result["spf_domain"] = domain
         elif protocol == "dkim":
             result["dkim_result"] = outcome
-            if domain:
-                result["dkim_domain"] = domain
         elif protocol == "dmarc":
             result["dmarc_result"] = outcome
+
+    # Extract domains separately
+    spf_domain = re.search(r'smtp\.mailfrom=([\w.\-]+)', header_value, re.IGNORECASE)
+    dkim_domain = re.search(r'header\.(?:from|i)=@?([\w.\-]+)', header_value, re.IGNORECASE)
+    if spf_domain:
+        result["spf_domain"] = spf_domain.group(1)
+    if dkim_domain:
+        result["dkim_domain"] = dkim_domain.group(1)
 
     return result
 
